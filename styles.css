@@ -265,8 +265,12 @@ p {
 }
 
 .ops-console {
+  --ops-vh: 100dvh;
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--ops-vh);
   display: none;
   align-items: center;
   justify-content: center;
@@ -282,7 +286,7 @@ p {
 .ops-console__panel {
   position: relative;
   width: min(56rem, 96vw);
-  height: min(36rem, 85vh);
+  height: min(36rem, calc(var(--ops-vh) - 2rem));
   border: 1px solid #2d633a;
   border-radius: 0.8rem;
   overflow: hidden;
@@ -446,7 +450,7 @@ p {
 
   .ops-console__panel {
     width: 100%;
-    height: min(34rem, 88vh);
+    height: min(34rem, calc(var(--ops-vh) - 0.9rem));
   }
 }
 

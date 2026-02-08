@@ -17,6 +17,7 @@
   let matrixTimer = null;
   let drops = [];
   let fontSize = 14;
+  let lockedScrollY = 0;
 
   const konami = [
     "ArrowUp",
@@ -44,10 +45,47 @@
     opsOutput.innerHTML = "";
   }
 
+  function lockPageScroll() {
+    lockedScrollY = window.scrollY || window.pageYOffset || 0;
+    document.body.style.position = "fixed";
+    document.body.style.top = "-" + lockedScrollY + "px";
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.width = "100%";
+    document.body.style.overflow = "hidden";
+  }
+
+  function unlockPageScroll() {
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.left = "";
+    document.body.style.right = "";
+    document.body.style.width = "";
+    document.body.style.overflow = "";
+    window.scrollTo(0, lockedScrollY);
+  }
+
+  function updateConsoleViewport() {
+    const viewport = window.visualViewport;
+
+    if (viewport) {
+      opsConsole.style.setProperty("--ops-vh", Math.max(240, Math.floor(viewport.height)) + "px");
+      opsConsole.style.top = Math.floor(viewport.offsetTop) + "px";
+    } else {
+      opsConsole.style.setProperty("--ops-vh", Math.max(240, window.innerHeight) + "px");
+      opsConsole.style.top = "0px";
+    }
+
+    if (opsConsole.classList.contains("open")) {
+      resizeMatrix();
+    }
+  }
+
   function openConsole() {
     opsConsole.classList.add("open");
     opsConsole.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
+    lockPageScroll();
+    updateConsoleViewport();
     if (!openedOnce) {
       line("Booting Alexandra Ops Console...", "system");
       line("Access granted. Type 'help' for commands.", "success");
@@ -62,7 +100,7 @@
   function closeConsole() {
     opsConsole.classList.remove("open");
     opsConsole.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
+    unlockPageScroll();
     stopMatrix();
   }
 
@@ -298,9 +336,18 @@
     handleCommand(raw);
   });
 
+  opsInput.addEventListener("focus", function () {
+    window.setTimeout(updateConsoleViewport, 60);
+  });
+
   window.addEventListener("resize", function () {
     if (opsConsole.classList.contains("open")) {
-      resizeMatrix();
+      updateConsoleViewport();
     }
   });
+
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", updateConsoleViewport);
+    window.visualViewport.addEventListener("scroll", updateConsoleViewport);
+  }
 })();
